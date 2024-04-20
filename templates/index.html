@@ -6,17 +6,52 @@
     <title>Ask Solar</title>
     <script>
         async function askSolar() {
-            const context = document.getElementById("context").value;
-            const question = document.getElementById("question").value;
-
             const response = await fetch("/ask", {
                 method: "POST",
                 body: new FormData(document.getElementById("askForm"))
             });
 
             const data = await response.json();
-            document.getElementById("answer").innerText = data.answer;
-            document.getElementById("groundednessResult").innerText = data.groundedness_result;
+
+            // Set the text content of answer and groundedness result based on server response
+            const answerElement = document.getElementById("answer");
+            const groundednessElement = document.getElementById("groundednessResult");
+
+            if (data.answer) {
+                answerElement.innerText = data.answer;
+            } else {
+                answerElement.innerText = "No answer provided.";
+            }
+
+            if (data.groundedness_result) {
+                groundednessElement.innerText = data.groundedness_result;
+            } else {
+                groundednessElement.innerText = "No groundedness result provided.";
+            }
+
+            // Fetch and update the log to keep the history current
+            updateLog();
+        }
+
+        async function updateLog() {
+            const response = await fetch("/log", {
+                method: "GET"
+            });
+
+            const log = await response.json();
+            const logContainer = document.getElementById("log");
+
+            logContainer.innerHTML = ""; // Clear previous log
+
+            log.forEach(entry => {
+                const logItem = document.createElement("div");
+                logItem.innerHTML = `
+                    <h3>Question: ${entry.question}</h3>
+                    <p>Answer: ${entry.answer}</p>
+                    <p>Groundedness: ${entry.groundedness_result}</p>
+                `;
+                logContainer.appendChild(logItem);
+            });
         }
     </script>
 </head>
@@ -35,5 +70,8 @@
     <p id="answer"></p>
     <h2>Groundedness Result:</h2>
     <p id="groundednessResult"></p>
+
+    <h2>Log of Responses:</h2>
+    <div id="log"></div> <!-- Log of responses and groundedness -->
 </body>
 </html>
