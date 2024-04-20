@@ -1,10 +1,19 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Ask Solar</title>
     <script>
+        function addContext() {
+            const contextContainer = document.getElementById("contextContainer");
+            const newInput = document.createElement("input");
+            newInput.type = "text";
+            newInput.name = "context";
+            newInput.placeholder = "Enter context";
+            contextContainer.appendChild(newInput);  // Add the new input field
+            contextContainer.appendChild(document.createElement("br"));  // Line break
+        }
+
         async function askSolar() {
             const response = await fetch("/ask", {
                 method: "POST",
@@ -13,7 +22,6 @@
 
             const data = await response.json();
 
-            // Set the text content of answer and groundedness result based on server response
             const answerElement = document.getElementById("answer");
             const groundednessElement = document.getElementById("groundednessResult");
 
@@ -29,8 +37,7 @@
                 groundednessElement.innerText = "No groundedness result provided.";
             }
 
-            // Fetch and update the log to keep the history current
-            updateLog();
+            updateLog();  // Update the log after asking the question
         }
 
         async function updateLog() {
@@ -41,7 +48,7 @@
             const log = await response.json();
             const logContainer = document.getElementById("log");
 
-            logContainer.innerHTML = ""; // Clear previous log
+            logContainer.innerHTML = "";  // Clear previous log
 
             log.forEach(entry => {
                 const logItem = document.createElement("div");
@@ -58,8 +65,11 @@
 <body>
     <h1>Ask Solar</h1>
     <form id="askForm" onsubmit="event.preventDefault(); askSolar();">
-        <label for="context">Context:</label>
-        <input type="text" id="context" name="context" required>
+        <div id="contextContainer">
+            <input type="text" name="context" placeholder="Enter context" required>  <!-- Default context input -->
+            <br>
+        </div>
+        <button type="button" onclick="addContext()">Add Context</button>  <!-- Button to add more context -->
         <br>
         <label for="question">Question:</label>
         <input type="text" id="question" name="question" required>
@@ -72,6 +82,6 @@
     <p id="groundednessResult"></p>
 
     <h2>Log of Responses:</h2>
-    <div id="log"></div> <!-- Log of responses and groundedness -->
+    <div id="log"></div>  <!-- Log of responses and groundedness -->
 </body>
 </html>
