@@ -9,7 +9,7 @@ app = Flask(__name__)
 api_key = "hack-with-upstage-solar-0420"  # Ensure this is a valid API key
 client = OpenAI(api_key=api_key, base_url="https://api.upstage.ai/v1/solar")
 
-# Define a function to interact with the OpenAI API
+# Define a function to interact with the OpenAI API for asking questions
 def ask_solar(context, question):
     response = client.chat.completions.create(
         model="solar-1-mini-chat",
@@ -22,20 +22,37 @@ def ask_solar(context, question):
     )
     return response.choices[0].message.content
 
+# Define a function to check groundedness
+def check_groundedness(context, question, answer):
+    response = client.chat.completions.create(
+        model="solar-1-mini-answer-verification",
+        messages=[
+            {"role": "user", "content": context},
+            {"role": "assistant", "content": f"{question} {answer}"}
+        ]
+    )
+    return response.choices[0].message.content
+
 
 # Route for the main page with a simple form
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
 
-
-# Route to handle form submissions
+# Route to handle form submissions for asking questions and checking groundedness simultaneously
 @app.route("/ask", methods=["POST"])
-def ask():
+def ask_and_check():
     context = request.form["context"]
     question = request.form["question"]
+
+    # Get the answer from OpenAI
     answer = ask_solar(context, question)
-    return jsonify({"answer": answer})
+
+    # Check for groundedness
+    groundedness_result = check_groundedness(context, question, answer)
+
+    # Return both the answer and the groundedness result
+    return jsonify({"answer": answer, "groundedness_result": groundedness_result})
 
 
 # Run the Flask app

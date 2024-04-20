@@ -16,6 +16,7 @@
 
             const data = await response.json();
             document.getElementById("answer").innerText = data.answer;
+            document.getElementById("groundednessResult").innerText = data.groundedness_result;
         }
     </script>
 </head>
@@ -32,5 +33,7 @@
     </form>
     <h2>Answer:</h2>
     <p id="answer"></p>
+    <h2>Groundedness Result:</h2>
+    <p id="groundednessResult"></p>
 </body>
 </html>
